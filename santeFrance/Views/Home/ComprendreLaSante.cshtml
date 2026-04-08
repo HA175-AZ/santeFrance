@@ -1,0 +1,111 @@
+﻿@{
+    ViewData["Title"] = "Comprendre la santé";
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>Comprendre le système de santé</h1>
+    </div>
+</section>
+
+<section class="content-section">
+    <div class="container">
+        <!-- Le principe de solidarité -->
+        <div class="solidarity-box">
+            <h2>Le principe de solidarité</h2>
+            <p>
+                En France, tout le monde a droit à la santé. Le système repose sur la "Sécurité Sociale"
+                (Assurance Maladie) qui rembourse une grande partie de vos soins.
+            </p>
+        </div>
+
+        <!-- Médecin Généraliste vs Spécialiste -->
+        <div class="section-block">
+            <h2 class="section-icon">🩺 Médecin Généraliste vs Spécialiste</h2>
+
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h3>Le Médecin Traitant</h3>
+                    <p>
+                        C'est votre premier interlocuteur. Il vous suit au quotidien et vous oriente vers d'autres médecins si besoin.
+                    </p>
+                    <div class="info-badge">Remboursement max (70%)</div>
+                </div>
+
+                <div class="comparison-card">
+                    <h3>Le Spécialiste</h3>
+                    <p>
+                        Dermatologue, cardiologue, etc. Pour être bien remboursé, vous devez d'abord passer par votre généraliste (Parcours de soins).
+                    </p>
+                    <div class="info-badge specialiste">Sauf : Dentiste, Opticien, Gynéco</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Le Parcours de Soins Coordonnés -->
+        <div class="section-block">
+            <h2 class="section-icon">📋 Le Parcours de Soins Coordonnés</h2>
+
+            <div class="pathway-container">
+                <div class="pathway-steps">
+                    <div class="pathway-step">
+                        <div class="step-circle">1</div>
+                        <p class="step-label">Vous êtes malade</p>
+                    </div>
+                    <div class="pathway-arrow">→</div>
+                    <div class="pathway-step active">
+                        <div class="step-circle">2</div>
+                        <p class="step-label">Médecin Traitant</p>
+                    </div>
+                    <div class="pathway-arrow">→</div>
+                    <div class="pathway-step">
+                        <div class="step-circle">3</div>
+                        <p class="step-label">Spécialiste (si besoin)</p>
+                    </div>
+                </div>
+                <p class="pathway-note">
+                    Respecter ce parcours permet d'être remboursé à hauteur de 70% par l'Assurance Maladie.
+                </p>
+            </div>
+        </div>
+
+        <!-- La Carte Vitale expliquée -->
+        <div class="section-block">
+            <h2 class="section-icon">💳 La Carte Vitale expliquée</h2>
+
+            <div class="vitale-grid">
+                <div class="vitale-info">
+                    <p class="vitale-description">
+                        Ce n'est pas une carte de paiement. C'est une carte à puce qui contient vos
+                        informations administratives. Elle permet d'envoyer directement vos feuilles
+                        de soins à l'Assurance Maladie par voie électronique.
+                    </p>
+
+                    <ul class="vitale-benefits">
+                        <li>✅ Remis gratuitement après inscription</li>
+                        <li>✅ À présenter à chaque rendez-vous médical</li>
+                        <li>✅ Permet un remboursement en 5 jours</li>
+                    </ul>
+                </div>
+
+                <div class="vitale-card-visual">
+                    <div class="carte-vitale">
+                        <div class="carte-header">
+                            <div class="carte-chip"></div>
+                            <span class="carte-logo">🇫🇷</span>
+                        </div>
+                        <div class="carte-title">CARTE VITALE</div>
+                        <div class="carte-number">1 88 88 88 888 888</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Box -->
+        <div class="help-cta">
+            <h3>Besoin d'aide pour vous inscrire ?</h3>
+            <p>Notre guide détaillé vous accompagne pas à pas dans vos démarches.</p>
+            <a href="#" class="btn-primary">Télécharger le guide complet</a>
+        </div>
+    </div>
+</section>

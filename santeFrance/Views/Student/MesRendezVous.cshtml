@@ -1,0 +1,239 @@
+﻿@model IEnumerable<SanteFrance.Models.RendezVous>
+
+@{
+    ViewData["Title"] = "Mes Rendez-vous";
+    var user = ViewBag.User as SanteFrance.Models.User;
+}
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-dashboard">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">SantéFrance</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span>Dashboard</span>
+            </a>
+            <a asp-action="Profil" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Mon Profil</span>
+            </a>
+            <a asp-action="MesRendezVous" class="nav-item active">
+                <span class="nav-icon">📅</span>
+                <span>Mes Rendez-vous</span>
+            </a>
+            <a asp-controller="Home" asp-action="SecuriteSociale" class="nav-item">
+                <span class="nav-icon">📋</span>
+                <span>Mes démarches</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout">
+                <span>🚪</span> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div>
+                    <h1>Mes Rendez-vous</h1>
+                    <p>Gérez vos consultations médicales</p>
+                </div>
+                <a asp-controller="Home" asp-action="Medecins" class="btn-primary">
+                    ➕ Nouveau rendez-vous
+                </a>
+            </div>
+        </header>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (Model != null && Model.Any())
+        {
+            <!-- Tabs -->
+            <div class="tabs-rdv">
+                <button class="tab-btn active" onclick="filterRdv('tous')">
+                    Tous (@Model.Count())
+                </button>
+                <button class="tab-btn" onclick="filterRdv('a-venir')">
+                    À venir (@Model.Count(r => r.DateHeure >= DateTime.Now && r.Statut != "Annulé"))
+                </button>
+                <button class="tab-btn" onclick="filterRdv('passes')">
+                    Passés (@Model.Count(r => r.DateHeure < DateTime.Now || r.Statut == "Terminé"))
+                </button>
+                <button class="tab-btn" onclick="filterRdv('annules')">
+                    Annulés (@Model.Count(r => r.Statut == "Annulé"))
+                </button>
+            </div>
+
+            <!-- Liste des RDV -->
+            <div class="rdv-list-grid">
+                @foreach (var rdv in Model.OrderByDescending(r => r.DateHeure))
+                {
+                    var isPassed = rdv.DateHeure < DateTime.Now;
+                    var isAnnule = rdv.Statut == "Annulé";
+                    var isAVenir = rdv.DateHeure >= DateTime.Now && !isAnnule;
+
+                    <div class="rdv-card-full @(isPassed ? "rdv-passe" : "") @(isAnnule ? "rdv-annule" : "") @(isAVenir ? "rdv-a-venir" : "")"
+                         data-category="@(isAnnule ? "annules" : isPassed ? "passes" : "a-venir")">
+
+                        <div class="rdv-card-header">
+                            <div class="rdv-date-badge @(isAVenir ? "badge-active" : "")">
+                                <span class="date-day">@rdv.DateHeure.ToString("dd")</span>
+                                <span class="date-month">@rdv.DateHeure.ToString("MMM")</span>
+                                <span class="date-year">@rdv.DateHeure.ToString("yyyy")</span>
+                            </div>
+
+                            <div class="rdv-info-main">
+                                <div class="rdv-medecin">
+                                    <div class="medecin-avatar-small">
+                                        @if (!string.IsNullOrEmpty(rdv.Medecin?.PhotoUrl) && rdv.Medecin.PhotoUrl.StartsWith("/uploads/"))
+                                        {
+                                            <img src="@rdv.Medecin.PhotoUrl" alt="Dr. @rdv.Medecin.Prenom" />
+                                        }
+                                        else
+                                        {
+                                            <span>👨‍⚕️</span>
+                                        }
+                                    </div>
+                                    <div>
+                                        <h3>Dr. @rdv.Medecin?.Prenom @rdv.Medecin?.Nom</h3>
+                                        <p class="specialite-small">@rdv.Medecin?.Specialite</p>
+                                    </div>
+                                </div>
+
+                                <div class="rdv-details-grid">
+                                    <div class="detail-small">
+                                        <span class="icon-small">🕐</span>
+                                        <span>@rdv.DateHeure.ToString("HH:mm")</span>
+                                    </div>
+                                    <div class="detail-small">
+                                        <span class="icon-small">@(rdv.TypeRdv == "Téléphonique" ? "📞" : "🏥")</span>
+                                        <span>@rdv.TypeRdv</span>
+                                    </div>
+                                    <div class="detail-small">
+                                        <span class="icon-small">📍</span>
+                                        <span>@rdv.Medecin?.Ville</span>
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(rdv.Motif))
+                                {
+                                    <div class="rdv-motif">
+                                        <strong>Motif :</strong> @rdv.Motif
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="rdv-status-actions">
+                                <span class="status-badge status-@rdv.Statut.ToLower().Replace(" ", "-")">
+                                    @rdv.Statut
+                                </span>
+
+                                @if (isAVenir)
+                                {
+                                    <div class="rdv-actions">
+                                        <button onclick="annulerRdv(@rdv.Id)" class="btn-icon btn-cancel" title="Annuler">
+                                            ❌
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        @if (rdv.TypeRdv == "Sur place" && rdv.Medecin != null)
+                        {
+                            <div class="rdv-card-footer">
+                                <div class="adresse-info">
+                                    <span class="icon-small">📍</span>
+                                    <span>@rdv.Medecin.Adresse, @rdv.Medecin.CodePostal @rdv.Medecin.Ville</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(rdv.Medecin.Telephone))
+                                {
+                                    <a href="tel:@rdv.Medecin.Telephone" class="btn-call">
+                                        📞 Appeler
+                                    </a>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <span class="empty-icon">📅</span>
+                <h3>Aucun rendez-vous</h3>
+                <p>Vous n'avez pas encore pris de rendez-vous</p>
+                <a asp-controller="Home" asp-action="Medecins" class="btn-primary">
+                    Trouver un médecin
+                </a>
+            </div>
+        }
+    </main>
+</div>
+
+<script>
+        function annulerRdv(id) {
+        if (confirm('⚠️ Êtes-vous sûr de vouloir annuler ce rendez-vous ?\n\nPensez à prévenir votre médecin si c\'est dans moins de 24h.')) {
+
+            // Utiliser FormData au lieu de JSON
+            const formData = new FormData();
+            formData.append('id', id);
+
+            fetch('/Student/AnnulerRendezVous', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✓ ' + data.message);
+                    location.reload();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('❌ Erreur lors de l\'annulation : ' + error);
+            });
+        }
+    }
+
+    function filterRdv(category) {
+        // Update tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Filter cards
+        const cards = document.querySelectorAll('.rdv-card-full');
+
+        cards.forEach(card => {
+            if (category === 'tous') {
+                card.style.display = 'block';
+            } else {
+                if (card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            }
+        });
+    }
+</script>

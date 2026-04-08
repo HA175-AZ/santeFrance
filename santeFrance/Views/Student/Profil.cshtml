@@ -1,0 +1,359 @@
+﻿@model SanteFrance.Models.User
+
+@{
+    ViewData["Title"] = "Mon Profil";
+}
+
+<style>
+    /* Upload Photo */
+    .photo-upload-section {
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .photo-upload-area {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .photo-upload-input {
+        display: none;
+    }
+
+    .avatar-large img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .avatar-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.6);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.2s;
+        white-space: nowrap;
+    }
+
+    .photo-upload-area:hover .avatar-overlay {
+        opacity: 1;
+    }
+
+    .photo-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 12px;
+    }
+
+    .btn-photo-upload {
+        padding: 8px 16px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .btn-photo-upload:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+    .btn-photo-delete {
+        padding: 8px 16px;
+        background: rgba(244, 63, 94, 0.3);
+        color: white;
+        border: 1px solid rgba(244, 63, 94, 0.5);
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+        .btn-photo-delete:hover {
+            background: rgba(244, 63, 94, 0.5);
+            color: white;
+        }
+
+    .photo-hint {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 8px;
+        text-align: center;
+    }
+
+    .form-text {
+        font-size: 12px;
+        color: #94A3B8;
+        margin-top: 4px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-dashboard">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">SantéFrance</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span>Dashboard</span>
+            </a>
+            <a asp-action="Profil" class="nav-item active">
+                <span class="nav-icon">👤</span>
+                <span>Mon Profil</span>
+            </a>
+            <a asp-action="MesRendezVous" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span>Mes Rendez-vous</span>
+            </a>
+            <a asp-action="MesDemarches" class="nav-item">
+                <span class="nav-icon">📋</span>
+                <span>Mes démarches</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout">
+                <span>🚪</span> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div>
+                    <h1>Mon Profil</h1>
+                    <p>Gérez vos informations personnelles</p>
+                </div>
+            </div>
+        </header>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error">
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="profil-container">
+            <div class="profil-grid">
+                <!-- Carte Avatar -->
+                <div class="avatar-card">
+                    <!-- Zone photo cliquable -->
+                    <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+                        <div class="avatar-large">
+                            @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+                            {
+                                <img src="@Model.PhotoUrl" alt="Photo de @Model.Prenom" />
+                            }
+                            else
+                            {
+                                @Model.Prenom.Substring(0, 1)@Model.Nom.Substring(0, 1)
+                            }
+                        </div>
+                        <span class="avatar-overlay">📷 Modifier la photo</span>
+                    </div>
+
+                    <h2>@Model.Prenom @Model.Nom</h2>
+                    <p class="user-email">@Model.Email</p>
+
+                    <!-- Upload Photo -->
+                    <div class="photo-upload-section">
+                        <form asp-action="UploadPhoto" method="post" enctype="multipart/form-data" id="photoForm">
+                            <input type="file" name="photo" id="photoInput" class="photo-upload-input"
+                                   accept=".jpg,.jpeg,.png,.gif,.webp"
+                                   onchange="document.getElementById('photoForm').submit();" />
+                        </form>
+
+                        <div class="photo-actions">
+                            <button type="button" class="btn-photo-upload" onclick="document.getElementById('photoInput').click()">
+                                📷 Changer la photo
+                            </button>
+                            @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+                            {
+                                <form asp-action="SupprimerPhoto" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-photo-delete"
+                                            onclick="return confirm('Supprimer la photo ?')">
+                                        🗑️ Supprimer
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                        <p class="photo-hint">JPG, PNG, GIF ou WebP · Max 5 Mo</p>
+                    </div>
+
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">@ViewBag.NombreRdv</span>
+                            <span class="stat-label">Rendez-vous</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">@((DateTime.Now - Model.DateInscription).Days) j</span>
+                            <span class="stat-label">Membre depuis</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire -->
+                <div class="profil-form-card">
+                    <form asp-action="UpdateProfil" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Email" />
+                        <input type="hidden" asp-for="MotDePasse" />
+                        <input type="hidden" asp-for="DateInscription" />
+                        <input type="hidden" asp-for="DateNaissance" />
+                        <input type="hidden" asp-for="Nationalite" />
+
+                        <div class="form-section">
+                            <h3>📝 Informations personnelles</h3>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label asp-for="Nom">Nom *</label>
+                                    <input asp-for="Nom" class="form-control" required />
+                                    <span asp-validation-for="Nom" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Prenom">Prénom *</label>
+                                    <input asp-for="Prenom" class="form-control" required />
+                                    <span asp-validation-for="Prenom" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Telephone">Téléphone</label>
+                                <input asp-for="Telephone" type="tel" class="form-control" placeholder="+33 6 12 34 56 78" />
+                                <span asp-validation-for="Telephone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>🏠 Adresse</h3>
+
+                            <div class="form-group">
+                                <label asp-for="Adresse">Adresse</label>
+                                <input asp-for="Adresse" class="form-control" placeholder="Rue, numéro..." />
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label asp-for="CodePostal">Code Postal</label>
+                                    <input asp-for="CodePostal" class="form-control" placeholder="75001" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Ville">Ville</label>
+                                    <input asp-for="Ville" class="form-control" placeholder="Paris" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>🎓 Études & Santé</h3>
+
+                            <div class="form-group">
+                                <label asp-for="Universite">Université</label>
+                                <input asp-for="Universite" class="form-control" placeholder="Nom de votre université" />
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label asp-for="NumeroSecu">Numéro de Sécurité Sociale</label>
+                                    <input asp-for="NumeroSecu" class="form-control" placeholder="1 88 88 88 888 888" maxlength="15" />
+                                    <small class="form-text">15 chiffres</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input asp-for="ACarteVitale" type="checkbox" />
+                                        <span>J'ai ma Carte Vitale</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                ✓ Enregistrer les modifications
+                            </button>
+                            <a asp-action="Dashboard" class="btn-secondary">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Cards -->
+            <div class="info-cards-profil">
+                <div class="info-card-profil">
+                    <span class="info-icon">📧</span>
+                    <div>
+                        <strong>Email inscrit</strong>
+                        <p>@Model.Email</p>
+                        <small>Non modifiable</small>
+                    </div>
+                </div>
+
+                <div class="info-card-profil">
+                    <span class="info-icon">🎂</span>
+                    <div>
+                        <strong>Date de naissance</strong>
+                        <p>@Model.DateNaissance.ToString("dd/MM/yyyy")</p>
+                        <small>@((DateTime.Now.Year - Model.DateNaissance.Year)) ans</small>
+                    </div>
+                </div>
+
+                <div class="info-card-profil">
+                    <span class="info-icon">🌍</span>
+                    <div>
+                        <strong>Nationalité</strong>
+                        <p>@Model.Nationalite</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

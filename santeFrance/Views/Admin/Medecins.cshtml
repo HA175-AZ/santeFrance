@@ -1,0 +1,135 @@
+﻿@model IEnumerable<SanteFrance.Models.Medecin>
+
+@{
+    ViewData["Title"] = "Gestion des Médecins";
+}
+
+<div class="admin-container">
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-admin">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">Admin Panel</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+            <a asp-action="Medecins" class="nav-item active"><span class="nav-icon">👨‍⚕️</span><span>Médecins</span></a>
+            <a asp-action="Etudiants" class="nav-item"><span class="nav-icon">👥</span><span>Étudiants</span></a>
+            <a asp-action="RendezVous" class="nav-item"><span class="nav-icon">📅</span><span>Rendez-vous</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout"><span>🚪</span> Déconnexion</a>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="header-content">
+                <div>
+                    <h1>👨‍⚕️ Gestion des Médecins</h1>
+                    <p>@Model.Count() médecin(s) enregistré(s)</p>
+                </div>
+                <a asp-action="AjouterMedecin" class="btn-primary">➕ Ajouter un médecin</a>
+            </div>
+        </header>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Médecin</th>
+                        <th>Spécialité</th>
+                        <th>Ville</th>
+                        <th>Langues</th>
+                        <th>Carte Vitale</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var medecin in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="medecin-info">
+                                    <div class="medecin-avatar">
+                                        @if (!string.IsNullOrEmpty(medecin.PhotoUrl) && medecin.PhotoUrl.StartsWith("/uploads/"))
+                                        {
+                                            <img src="@medecin.PhotoUrl" alt="@medecin.Prenom" />
+                                        }
+                                        else
+                                        {
+                                            @medecin.Prenom.Substring(0, 1)@medecin.Nom.Substring(0, 1)
+                                        }
+                                    </div>
+                                    <div>
+                                        <strong>Dr. @medecin.Prenom @medecin.Nom</strong>
+                                        <br><small>@medecin.Email</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@medecin.Specialite</td>
+                            <td>@medecin.Ville (@medecin.CodePostal)</td>
+                            <td>@medecin.Langues</td>
+                            <td>
+                                @if (medecin.AccepteCarteVitale)
+                                {
+                                    <span class="badge badge-success">✓ Oui</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">✗ Non</span>
+                                }
+                            </td>
+                            <td>
+                                @if (medecin.EstActif)
+                                {
+                                    <span class="badge badge-success">Actif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">Inactif</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="ModifierMedecin" asp-route-id="@medecin.Id" class="btn-edit" title="Modifier">✏️</a>
+                                    <button onclick="supprimerMedecin(@medecin.Id)" class="btn-delete" title="Supprimer">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <span class="empty-icon">👨‍⚕️</span>
+                    <h3>Aucun médecin enregistré</h3>
+                    <p>Commencez par ajouter votre premier médecin</p>
+                    <a asp-action="AjouterMedecin" class="btn-primary">Ajouter un médecin</a>
+                </div>
+            }
+        </div>
+    </main>
+</div>
+
+<script>
+    function supprimerMedecin(id) {
+        if (confirm('Supprimer ce médecin ?')) {
+            fetch('/Admin/SupprimerMedecin/' + id, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) { alert('✓ Supprimé'); location.reload(); }
+                else { alert('❌ ' + data.message); }
+            });
+        }
+    }
+</script>

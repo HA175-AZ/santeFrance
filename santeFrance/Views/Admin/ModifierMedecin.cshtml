@@ -1,0 +1,224 @@
+﻿@model SanteFrance.Models.Medecin
+
+@{
+    ViewData["Title"] = "Modifier un Médecin";
+}
+
+<div class="admin-container">
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-admin">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">Admin Panel</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+            <a asp-action="Medecins" class="nav-item active"><span class="nav-icon">👨‍⚕️</span><span>Médecins</span></a>
+            <a asp-action="Etudiants" class="nav-item"><span class="nav-icon">👥</span><span>Étudiants</span></a>
+            <a asp-action="RendezVous" class="nav-item"><span class="nav-icon">📅</span><span>Rendez-vous</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout"><span>🚪</span> Déconnexion</a>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="header-content">
+                <div>
+                    <h1>✏️ Modifier — Dr. @Model.Prenom @Model.Nom</h1>
+                    <p>@Model.Specialite · @Model.Ville</p>
+                </div>
+                <a asp-action="Medecins" class="btn-secondary">← Retour à la liste</a>
+            </div>
+        </header>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <div class="form-container">
+            <form asp-action="ModifierMedecin" method="post" enctype="multipart/form-data" class="admin-form">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="DateAjout" />
+
+                <!-- Photo -->
+                <div class="form-section">
+                    <h3>📷 Photo du médecin</h3>
+                    <div class="photo-upload-zone @(!string.IsNullOrEmpty(Model.PhotoUrl) && Model.PhotoUrl.StartsWith("/uploads/") ? "has-photo" : "")"
+                         id="photoZone" onclick="document.getElementById('photoMedecin').click()">
+
+                        @if (!string.IsNullOrEmpty(Model.PhotoUrl) && Model.PhotoUrl.StartsWith("/uploads/"))
+                        {
+                            <img id="photoPreview" class="photo-preview" src="@Model.PhotoUrl" />
+                            <span class="photo-upload-icon" id="photoIcon" style="display:none;">📷</span>
+                        }
+                        else
+                        {
+                            <img id="photoPreview" class="photo-preview" style="display:none;" />
+                            <span class="photo-upload-icon" id="photoIcon">📷</span>
+                        }
+                        <div class="photo-upload-text" id="photoText">
+                            @(!string.IsNullOrEmpty(Model.PhotoUrl) && Model.PhotoUrl.StartsWith("/uploads/") ? "Cliquez pour changer la photo" : "Cliquez pour ajouter une photo")
+                        </div>
+                        <div class="photo-upload-hint">JPG, PNG, GIF ou WebP · Max 5 Mo</div>
+                    </div>
+                    <input type="file" name="photo" id="photoMedecin" accept=".jpg,.jpeg,.png,.gif,.webp" style="display:none;"
+                           onchange="previewPhoto(this)" />
+
+                    @if (!string.IsNullOrEmpty(Model.PhotoUrl) && Model.PhotoUrl.StartsWith("/uploads/"))
+                    {
+                        <button type="button" class="btn-remove-photo" onclick="supprimerPhotoMedecin(@Model.Id)">
+                            🗑️ Supprimer la photo
+                        </button>
+                    }
+                </div>
+
+                <!-- Infos personnelles -->
+                <div class="form-section">
+                    <h3>👤 Informations personnelles</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="Nom">Nom *</label>
+                            <input asp-for="Nom" class="form-control" required />
+                            <span asp-validation-for="Nom" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Prenom">Prénom *</label>
+                            <input asp-for="Prenom" class="form-control" required />
+                            <span asp-validation-for="Prenom" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Specialite">Spécialité *</label>
+                        <select asp-for="Specialite" class="form-control" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option value="Médecin Généraliste">Médecin Généraliste</option>
+                            <option value="Cardiologue">Cardiologue</option>
+                            <option value="Dermatologue">Dermatologue</option>
+                            <option value="Gynécologue">Gynécologue</option>
+                            <option value="Pédiatre">Pédiatre</option>
+                            <option value="Psychiatre">Psychiatre</option>
+                            <option value="Ophtalmologue">Ophtalmologue</option>
+                            <option value="Dentiste">Dentiste</option>
+                            <option value="ORL">ORL</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="form-section">
+                    <h3>📞 Contact</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="Telephone">Téléphone</label>
+                            <input asp-for="Telephone" type="tel" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Email">Email</label>
+                            <input asp-for="Email" type="email" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Adresse">Adresse *</label>
+                        <input asp-for="Adresse" class="form-control" required />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label asp-for="CodePostal">Code Postal *</label>
+                            <input asp-for="CodePostal" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Ville">Ville *</label>
+                            <input asp-for="Ville" class="form-control" required />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complémentaire -->
+                <div class="form-section">
+                    <h3>ℹ️ Informations complémentaires</h3>
+                    <div class="form-group">
+                        <label asp-for="Langues">Langues parlées *</label>
+                        <input asp-for="Langues" class="form-control" required />
+                        <small class="form-text">Séparez par des virgules</small>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><input asp-for="AccepteCarteVitale" type="checkbox" /> Accepte la Carte Vitale</label>
+                        </div>
+                        <div class="form-group">
+                            <label><input asp-for="TiersPayant" type="checkbox" /> Pratique le tiers-payant</label>
+                        </div>
+                        <div class="form-group">
+                            <label><input asp-for="EstActif" type="checkbox" /> Médecin actif</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Description">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Horaires">Horaires</label>
+                        <textarea asp-for="Horaires" class="form-control" rows="3" placeholder="Lun-Ven: 9h-18h"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">✓ Enregistrer</button>
+                    <a asp-action="Medecins" class="btn-secondary">Annuler</a>
+                    <button type="button" onclick="confirmerSuppression(@Model.Id)" class="btn-danger" style="margin-left: auto;">
+                        🗑️ Supprimer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    function previewPhoto(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('photoPreview').src = e.target.result;
+                document.getElementById('photoPreview').style.display = 'block';
+                document.getElementById('photoIcon').style.display = 'none';
+                document.getElementById('photoText').textContent = input.files[0].name;
+                document.getElementById('photoZone').classList.add('has-photo');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function supprimerPhotoMedecin(id) {
+        if (confirm('Supprimer la photo de ce médecin ?')) {
+            fetch('/Admin/SupprimerPhotoMedecin?id=' + id, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) { location.reload(); }
+                else { alert('❌ ' + data.message); }
+            });
+        }
+    }
+
+    function confirmerSuppression(id) {
+        if (confirm('⚠️ Supprimer ce médecin et tous ses RDV ?\nCette action est irréversible.')) {
+            fetch('/Admin/SupprimerMedecin/' + id, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✓ Médecin supprimé');
+                    window.location.href = '@Url.Action("Medecins", "Admin")';
+                } else { alert('❌ ' + data.message); }
+            });
+        }
+    }
+</script>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

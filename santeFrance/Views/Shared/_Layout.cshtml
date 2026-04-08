@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SantéFrance</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/student.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="navbar-brand">
+                    <a asp-controller="Home" asp-action="Index" class="logo">
+                        <div class="logo-icon">S</div>
+                        <span class="logo-text">SantéFrance</span>
+                    </a>
+                </div>
+
+                <button class="menu-toggle" aria-label="Menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+
+                <div class="navbar-menu">
+                    <ul class="nav-links">
+                        <li><a asp-controller="Home" asp-action="Index">Accueil</a></li>
+                        <li><a asp-controller="Home" asp-action="ComprendreLaSante">Comprendre la santé</a></li>
+                        <li><a asp-controller="Home" asp-action="Medecins">Médecins</a></li>
+                        <li><a asp-controller="Home" asp-action="SecuriteSociale">Sécurité sociale</a></li>
+                        <li><a asp-controller="Home" asp-action="Urgences">Urgences</a></li>
+                        <li><a asp-controller="Home" asp-action="SanteMentale">Santé mentale</a></li>
+                    </ul>
+                    <div class="navbar-actions">
+                        <div class="language-selector" id="langSelector">
+                            <span class="globe-icon">🌐</span>
+                            <span class="lang-current" id="langCurrent">Français</span>
+                            <span class="dropdown-arrow" id="langArrow">▼</span>
+                            <ul class="language-dropdown" id="langDropdown">
+                                <li data-lang="fr" class="lang-option active">🇫🇷 Français</li>
+                                <li data-lang="en" class="lang-option">🇬🇧 English</li>
+                                <li data-lang="es" class="lang-option">🇪🇸 Español</li>
+                                <li data-lang="ar" class="lang-option">🇸🇦 العربية</li>
+                                <li data-lang="zh" class="lang-option">🇨🇳 中文</li>
+                            </ul>
+                        </div>
+
+                        @if (Context.Session.GetString("UserType") != null)
+                        {
+                            <div class="user-menu">
+                                @if (Context.Session.GetString("UserType") == "Admin")
+                                {
+                                    <a asp-controller="Admin" asp-action="Dashboard" class="btn-dashboard">
+                                        👤 @Context.Session.GetString("AdminName")
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Student" asp-action="Dashboard" class="btn-dashboard">
+                                        👤 @Context.Session.GetString("UserName")
+                                    </a>
+                                }
+                                <a asp-controller="Account" asp-action="Logout" class="btn-deconnexion">Déconnexion</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="btn-connexion">Connexion</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    @await Html.PartialAsync("_Footer")
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

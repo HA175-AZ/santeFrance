@@ -1,0 +1,21 @@
+﻿@"
+## .NET Build
+bin/
+obj/
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.cache
+
+## Uploads (photos utilisateurs/medecins)
+wwwroot/uploads/
+
+## Secrets
+appsettings.Development.json
+
+## Database locale
+*.mdf
+*.ldf
+"@ | Set-Content ".gitignore" -Encoding UTF8

@@ -1,0 +1,115 @@
+﻿@{
+    ViewData["Title"] = "Urgences";
+}
+
+<!-- Alerte urgence immédiate -->
+<section class="emergency-alert">
+    <div class="container">
+        <div class="alert-box">
+            <div class="alert-icon">⚠️</div>
+            <h2>Besoin d'aide immédiate ?</h2>
+            <p class="alert-text">Si une vie est en danger, n'attendez pas.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Numéros d'urgence principaux -->
+<section class="emergency-numbers-main">
+    <div class="container">
+        <div class="emergency-grid-main">
+            <!-- 15 - SAMU -->
+            <div class="emergency-card-main samu">
+                <h2 class="emergency-number">15</h2>
+                <h3 class="emergency-title">SAMU</h3>
+                <p class="emergency-subtitle">Urgences médicales graves</p>
+            </div>
+
+            <!-- 18 - Pompiers -->
+            <div class="emergency-card-main pompiers">
+                <h2 class="emergency-number">18</h2>
+                <h3 class="emergency-title">Pompiers</h3>
+                <p class="emergency-subtitle">Incendies, accidents, secours</p>
+            </div>
+
+            <!-- 17 - Police -->
+            <div class="emergency-card-main police">
+                <h2 class="emergency-number">17</h2>
+                <h3 class="emergency-title">Police</h3>
+                <p class="emergency-subtitle">Urgences sécuritaires</p>
+            </div>
+
+            <!-- 112 - Urgence EU -->
+            <div class="emergency-card-main europe">
+                <h2 class="emergency-number">112</h2>
+                <h3 class="emergency-title">Urgence EU</h3>
+                <p class="emergency-subtitle">Numéro unique européen</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quand appeler + Sans carte vitale -->
+<section class="info-section">
+    <div class="container">
+        <div class="info-grid">
+            <!-- Quand appeler les urgences -->
+            <div class="info-block">
+                <h2>Quand appeler les urgences ?</h2>
+                <ul class="emergency-situations">
+                    <li>
+                        <span class="situation-icon">❤️</span>
+                        <span>Difficulté respiratoire ou étouffement</span>
+                    </li>
+                    <li>
+                        <span class="situation-icon">❤️</span>
+                        <span>Douleur thoracique intense</span>
+                    </li>
+                    <li>
+                        <span class="situation-icon">❤️</span>
+                        <span>Perte de connaissance ou malaise grave</span>
+                    </li>
+                    <li>
+                        <span class="situation-icon">❤️</span>
+                        <span>Accident de la route avec blessés</span>
+                    </li>
+                    <li>
+                        <span class="situation-icon">❤️</span>
+                        <span>Brûlures graves ou hémorragies</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Sans Carte Vitale -->
+            <div class="info-block dark">
+                <h2>Sans Carte Vitale ?</h2>
+                <p class="vitale-info">
+                    Aux urgences d'un hôpital public, vous serez soigné même sans carte vitale ou sans argent.
+                    Ne restez pas sans soin.
+                </p>
+
+                <div class="services-list">
+                    <h3>🌙 Soins le soir et le week-end</h3>
+                    <div class="service-item">
+                        <span class="service-name">SOS Médecins</span>
+                        <a href="tel:3624" class="service-number">36 24</a>
+                    </div>
+                    <div class="service-item">
+                        <span class="service-name">Pharmacie de garde</span>
+                        <a href="tel:3237" class="service-number">32 37</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Carte des urgences -->
+<section class="map-section">
+    <div class="container">
+        <div class="map-placeholder">
+            <div class="map-icon">📍</div>
+            <h3>Carte des urgences les plus proches</h3>
+            <p>Activez la géolocalisation pour voir les résultats.</p>
+        </div>
+    </div>
+</section>

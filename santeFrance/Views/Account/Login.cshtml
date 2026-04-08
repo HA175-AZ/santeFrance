@@ -1,0 +1,157 @@
+﻿@{
+    ViewData["Title"] = "Connexion";
+}
+
+<section class="auth-section">
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <div class="logo-auth">
+                    <div class="logo-icon">S</div>
+                    <span class="logo-text">SantéFrance</span>
+                </div>
+                <h1>Content de vous revoir !</h1>
+                <p>Accédez à votre espace personnel.</p>
+            </div>
+
+            <!-- Onglets -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('etudiant')">Étudiant</button>
+                <button class="tab" onclick="switchTab('admin')">Admin</button>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Success"]
+                </div>
+            }
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-error">
+                    @ViewBag.Error
+                </div>
+            }
+
+            <!-- Formulaire Étudiant -->
+            <form id="form-etudiant" asp-action="Login" method="post" class="auth-form">
+                <input type="hidden" name="userType" value="Etudiant" />
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">📧</span>
+                        <input type="email" name="email" class="form-control" placeholder="votre@email.com" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="motDePasse">Mot de passe</label>
+                    <div class="password-field">
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" name="motDePasse" class="form-control" placeholder="••••••••" required />
+                        </div>
+                        <a href="#" class="forgot-link">Oublié ?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-auth">
+                    Se connecter →
+                </button>
+
+                <div class="auth-footer">
+                    <p>Pas encore de compte ? <a asp-action="Register">Créer un compte</a></p>
+                </div>
+            </form>
+
+            <!-- Formulaire Admin -->
+            <form id="form-admin" asp-action="Login" method="post" class="auth-form" style="display: none;">
+                <input type="hidden" name="userType" value="Admin" />
+
+                <div class="form-group">
+                    <label for="email">Email Admin</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">📧</span>
+                        <input type="email" name="email" class="form-control" placeholder="admin@santefrance.fr" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="motDePasse">Mot de passe</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="motDePasse" class="form-control" placeholder="••••••••" required />
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Admin par défaut :</strong><br>
+                    Email: admin@santefrance.fr<br>
+                    Mot de passe: Admin123!
+                </div>
+
+                <button type="submit" class="btn-auth">
+                    Connexion Admin →
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    function switchTab(type) {
+        // Gérer les onglets
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Afficher/masquer les formulaires
+        if (type === 'etudiant') {
+            document.getElementById('form-etudiant').style.display = 'block';
+            document.getElementById('form-admin').style.display = 'none';
+        } else {
+            document.getElementById('form-etudiant').style.display = 'none';
+            document.getElementById('form-admin').style.display = 'block';
+        }
+    }
+</script>
+
+<style>
+    .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        background: #F3F4F6;
+        padding: 4px;
+        border-radius: 8px;
+    }
+
+    .tab {
+        flex: 1;
+        padding: 10px;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #6B7280;
+    }
+
+        .tab.active {
+            background: white;
+            color: #7C3AED;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+    .alert-info {
+        background: #DBEAFE;
+        color: #1E40AF;
+        border: 1px solid #93C5FD;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 16px;
+    }
+</style>

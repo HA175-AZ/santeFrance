@@ -1,0 +1,234 @@
+﻿@{
+    ViewData["Title"] = "Prendre Rendez-vous";
+    var medecin = ViewBag.Medecin as SanteFrance.Models.Medecin;
+    var user = ViewBag.User as SanteFrance.Models.User;
+}
+
+<!-- Header Simple -->
+<header class="simple-header">
+    <div class="container">
+        <div class="header-content">
+            <a asp-controller="Home" asp-action="Index" class="logo-link">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">SantéFrance</span>
+            </a>
+            <a asp-controller="Home" asp-action="Medecins" class="btn-back">
+                ← Retour aux médecins
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content (SANS SIDEBAR) -->
+<main class="rdv-main-content">
+    <div class="container">
+        <div class="page-title">
+            <h1>Prendre Rendez-vous</h1>
+            <p>Avec Dr. @medecin.Prenom @medecin.Nom - @medecin.Specialite</p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error">
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="rdv-container">
+            <div class="rdv-grid">
+                <!-- Info Médecin -->
+                <div class="medecin-card">
+                    <div class="medecin-header">
+                        <div class="medecin-avatar-large">
+                            @(medecin.PhotoUrl ?? "👨‍⚕️")
+                        </div>
+                        <div>
+                            <h2>Dr. @medecin.Prenom @medecin.Nom</h2>
+                            <p class="specialty">@medecin.Specialite</p>
+                        </div>
+                    </div>
+
+                    <div class="medecin-details">
+                        <div class="detail-item">
+                            <span class="icon">📍</span>
+                            <div>
+                                <strong>Adresse</strong>
+                                <p>@medecin.Adresse<br>@medecin.CodePostal @medecin.Ville</p>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(medecin.Telephone))
+                        {
+                            <div class="detail-item">
+                                <span class="icon">📞</span>
+                                <div>
+                                    <strong>Téléphone</strong>
+                                    <p><a href="tel:@medecin.Telephone">@medecin.Telephone</a></p>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="detail-item">
+                            <span class="icon">🗣️</span>
+                            <div>
+                                <strong>Langues</strong>
+                                <p>@medecin.Langues</p>
+                            </div>
+                        </div>
+
+                        @if (medecin.AccepteCarteVitale)
+                        {
+                            <div class="detail-item">
+                                <span class="icon">💳</span>
+                                <div>
+                                    <strong>Carte Vitale acceptée</strong>
+                                </div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(medecin.Horaires))
+                        {
+                            <div class="detail-item">
+                                <span class="icon">🕐</span>
+                                <div>
+                                    <strong>Horaires</strong>
+                                    <p>@medecin.Horaires</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Formulaire RDV -->
+                <div class="rdv-form-card">
+                    <h3>Choisir votre rendez-vous</h3>
+
+                    <form asp-action="PrendreRendezVous" method="post">
+                        <input type="hidden" name="medecinId" value="@medecin.Id" />
+
+                        <!-- Type de RDV -->
+                        <div class="form-group">
+                            <label>Type de consultation *</label>
+                            <div class="type-rdv-options">
+                                <label class="type-rdv-card">
+                                    <input type="radio" name="typeRdv" value="Sur place" checked required />
+                                    <div class="type-content">
+                                        <span class="type-icon">🏥</span>
+                                        <strong>Au cabinet</strong>
+                                        <p>Rendez-vous en présentiel</p>
+                                    </div>
+                                </label>
+
+                                <label class="type-rdv-card">
+                                    <input type="radio" name="typeRdv" value="Téléphonique" required />
+                                    <div class="type-content">
+                                        <span class="type-icon">📞</span>
+                                        <strong>Téléconsultation</strong>
+                                        <p>Appel téléphonique</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Date et Heure -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dateRdv">Date du rendez-vous *</label>
+                                <input type="date" id="dateRdv" name="dateRdv" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="heureRdv">Heure *</label>
+                                <select id="heureRdv" name="heureRdv" class="form-control" required>
+                                    <option value="">-- Choisir --</option>
+                                    <option value="08:00">08:00</option>
+                                    <option value="08:30">08:30</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="09:30">09:30</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="10:30">10:30</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="11:30">11:30</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="14:30">14:30</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="15:30">15:30</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="16:30">16:30</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="17:30">17:30</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Motif -->
+                        <div class="form-group">
+                            <label for="motif">Motif de consultation (optionnel)</label>
+                            <textarea id="motif" name="motif" class="form-control" rows="4" placeholder="Ex: Consultation de routine, douleurs abdominales, suivi..."></textarea>
+                            <small class="form-text">Cette information aide le médecin à mieux préparer votre consultation</small>
+                        </div>
+
+                        <!-- Rappel info patient -->
+                        <div class="info-box">
+                            <strong>👤 Vos informations</strong>
+                            <p>@user.Prenom @user.Nom</p>
+                            <p>@user.Email</p>
+                            @if (!string.IsNullOrEmpty(user.Telephone))
+                            {
+                                <p>@user.Telephone</p>
+                            }
+                            <a asp-controller="Student" asp-action="Profil" class="link-small">Modifier mes informations</a>
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-large">
+                            ✓ Confirmer le rendez-vous
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Combiner date et heure avant soumission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const date = document.getElementById('dateRdv').value;
+        const heure = document.getElementById('heureRdv').value;
+
+        if (!date || !heure) {
+            alert('Veuillez sélectionner une date et une heure');
+            return;
+        }
+
+        // Créer le DateTime
+        const dateHeure = date + 'T' + heure + ':00';
+
+        // Ajouter un champ caché avec la date complète
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'dateHeure';
+        input.value = dateHeure;
+        this.appendChild(input);
+
+        // Soumettre
+        this.submit();
+    });
+
+    // Gérer le style des radios
+    document.querySelectorAll('.type-rdv-card input').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('.type-rdv-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            if (this.checked) {
+                this.closest('.type-rdv-card').classList.add('selected');
+            }
+        });
+    });
+
+    // Sélectionner le premier par défaut
+    document.querySelector('.type-rdv-card input:checked').closest('.type-rdv-card').classList.add('selected');
+</script>

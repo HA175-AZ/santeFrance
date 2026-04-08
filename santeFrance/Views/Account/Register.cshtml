@@ -1,0 +1,129 @@
+﻿@model SanteFrance.Models.User
+
+@{
+    ViewData["Title"] = "Inscription";
+}
+
+<section class="auth-section">
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <div class="logo-auth">
+                    <div class="logo-icon">S</div>
+                    <span class="logo-text">SantéFrance</span>
+                </div>
+                <h1>Créer un compte</h1>
+                <p>Accédez à votre suivi santé et vos démarches.</p>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["Success"]
+                </div>
+            }
+
+            <form asp-action="Register" method="post" class="auth-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Nom">Nom</label>
+                        <input asp-for="Nom" class="form-control" placeholder="Votre nom" required />
+                        <span asp-validation-for="Nom" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Prenom">Prénom</label>
+                        <input asp-for="Prenom" class="form-control" placeholder="Votre prénom" required />
+                        <span asp-validation-for="Prenom" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Email">Email</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">📧</span>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="votre@email.com" required />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="MotDePasse">Mot de passe</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔒</span>
+                            <input asp-for="MotDePasse" type="password" class="form-control" placeholder="••••••••" required />
+                        </div>
+                        <span asp-validation-for="MotDePasse" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmerMotDePasse">Confirmer le mot de passe</label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔒</span>
+                            <input type="password" name="confirmerMotDePasse" class="form-control" placeholder="••••••••" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="DateNaissance">Date de naissance</label>
+                        <input asp-for="DateNaissance" type="date" class="form-control" required />
+                        <span asp-validation-for="DateNaissance" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Telephone">Téléphone</label>
+                        <input asp-for="Telephone" type="tel" class="form-control" placeholder="+33 6 12 34 56 78" />
+                        <span asp-validation-for="Telephone" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Nationalite">Nationalité</label>
+                    <input asp-for="Nationalite" class="form-control" placeholder="Ex: Française, Marocaine, Chinoise..." required />
+                    <span asp-validation-for="Nationalite" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Universite">Université</label>
+                    <input asp-for="Universite" class="form-control" placeholder="Nom de votre université" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Adresse">Adresse</label>
+                        <input asp-for="Adresse" class="form-control" placeholder="Rue, numéro..." />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="CodePostal">Code postal</label>
+                        <input asp-for="CodePostal" class="form-control" placeholder="75001" />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Ville">Ville</label>
+                        <input asp-for="Ville" class="form-control" placeholder="Paris" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-auth">
+                    S'inscrire
+                </button>
+
+                <div class="auth-footer">
+                    <p>Vous avez déjà un compte ? <a asp-action="Login">Se connecter</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

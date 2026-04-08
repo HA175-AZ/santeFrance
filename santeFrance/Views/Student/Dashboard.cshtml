@@ -1,0 +1,188 @@
+﻿@{
+    ViewData["Title"] = "Tableau de bord";
+    var user = ViewBag.User as SanteFrance.Models.User;
+    var rendezVous = ViewBag.RendezVous as List<SanteFrance.Models.RendezVous>;
+}
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-dashboard">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">SantéFrance</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a asp-action="Profil" class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Mon Profil</span>
+            </a>
+            <a asp-controller="Home" asp-action="SecuriteSociale" class="nav-item">
+                <span class="nav-icon">📋</span>
+                <span>Mes démarches</span>
+            </a>
+            <a asp-action="MesRendezVous" class="nav-item active">
+                <span class="nav-icon">📅</span>
+                <span>Mes Rendez-vous</span>
+            </a>
+            <a asp-controller="Home" asp-action="Medecins" class="nav-item">
+                <span class="nav-icon">❤️</span>
+                <span>Médecins favoris</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span>Paramètres</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout">
+                <span>🚪</span> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div>
+                    <h1>Tableau de bord</h1>
+                </div>
+                <div class="header-user">
+                    <span class="notification-bell">🔔</span>
+                    <div class="user-avatar">
+                        @user.Prenom.Substring(0, 1)
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h2>Bienvenue, @user.Prenom 👋</h2>
+            <p>Voici le suivi de votre installation en France.</p>
+        </section>
+
+        <!-- Grid Layout -->
+        <div class="dashboard-grid">
+            <!-- Checklist d'arrivée -->
+            <div class="dashboard-card checklist-card">
+                <h3>Checklist d'arrivée</h3>
+                <div class="checklist-items">
+                    <div class="checklist-item @(user.Universite != null ? "completed" : "")">
+                        <input type="checkbox" @(user.Universite != null ? "checked" : "") disabled />
+                        <span>S'inscrire à l'université</span>
+                    </div>
+                    <div class="checklist-item @(user.NumeroSecu != null ? "completed" : "")">
+                        <input type="checkbox" @(user.NumeroSecu != null ? "checked" : "") disabled />
+                        <span>Ouvrir un compte bancaire</span>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" disabled />
+                        <span>Demander son numéro de sécu</span>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" disabled />
+                        <span>Choisir un médecin traitant</span>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" disabled />
+                        <span>Prendre une mutuelle</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Favoris -->
+            <div class="dashboard-card favoris-card">
+                <h3>
+                    <span class="card-icon">❤️</span>
+                    Favoris
+                </h3>
+                <div class="favoris-list">
+                    <div class="favori-item">
+                        <div>
+                            <h4>Dr. Marie Laurent</h4>
+                            <p class="favori-type">Généraliste</p>
+                            <p class="favori-location">Paris 13e</p>
+                        </div>
+                    </div>
+                    <div class="favori-item">
+                        <div>
+                            <h4>Pharmacie Monge</h4>
+                            <p class="favori-type">Pharmacie</p>
+                            <p class="favori-location">Paris 5e</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Requise -->
+            <div class="dashboard-card action-card">
+                <div class="action-header">
+                    <span class="action-icon">⚠️</span>
+                    <div>
+                        <h4>Action Requise</h4>
+                        <p>Sécurité Sociale</p>
+                    </div>
+                </div>
+                <p class="action-text">
+                    Votre dossier est en attente de la preuve
+                    <strong>RIB (Coordonnées bancaires)</strong>
+                </p>
+                <a asp-controller="Home" asp-action="SecuriteSociale" class="btn-action-complete">
+                    Compléter mon dossier
+                </a>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a asp-controller="Home" asp-action="Medecins" class="action-btn btn-blue">
+                <span class="btn-icon">🔍</span>
+                <div>
+                    <h4>Trouver un docteur</h4>
+                    <p>Prenez RDV rapidement</p>
+                </div>
+            </a>
+
+            <a href="#" class="action-btn btn-green">
+                <span class="btn-icon">💬</span>
+                <div>
+                    <h4>Lexique médical</h4>
+                    <p>Phrases utiles à l'emploi</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Mes Rendez-vous -->
+        @if (rendezVous != null && rendezVous.Any())
+        {
+            <div class="dashboard-card rdv-card">
+                <h3>Mes prochains rendez-vous</h3>
+                <div class="rdv-list">
+                    @foreach (var rdv in rendezVous.Take(3))
+                    {
+                        <div class="rdv-item">
+                            <div class="rdv-date">
+                                <span class="rdv-day">@rdv.DateHeure.ToString("dd")</span>
+                                <span class="rdv-month">@rdv.DateHeure.ToString("MMM")</span>
+                            </div>
+                            <div class="rdv-info">
+                                <h4>Dr. @rdv.Medecin.Nom @rdv.Medecin.Prenom</h4>
+                                <p>@rdv.Medecin.Specialite</p>
+                                <p class="rdv-time">⏰ @rdv.DateHeure.ToString("HH:mm")</p>
+                            </div>
+                            <span class="rdv-status status-@rdv.Statut.ToLower().Replace(" ", "-")">
+                                @rdv.Statut
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </main>
+</div>

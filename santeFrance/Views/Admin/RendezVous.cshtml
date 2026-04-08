@@ -1,0 +1,276 @@
+﻿@model IEnumerable<SanteFrance.Models.RendezVous>
+
+@{
+    ViewData["Title"] = "Gestion des Rendez-vous";
+}
+
+<div class="admin-container">
+    <!-- Sidebar Admin -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-admin">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">Admin Panel</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a asp-action="Medecins" class="nav-item">
+                <span class="nav-icon">👨‍⚕️</span>
+                <span>Médecins</span>
+            </a>
+            <a asp-action="Etudiants" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span>Étudiants</span>
+            </a>
+            <a asp-action="RendezVous" class="nav-item active">
+                <span class="nav-icon">📅</span>
+                <span>Rendez-vous</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout">
+                <span>🚪</span> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <div>
+                    <h1>Gestion des Rendez-vous</h1>
+                    <p>@Model.Count() rendez-vous au total</p>
+                </div>
+                <div class="search-box-admin">
+                    <input type="text" id="searchRdv" placeholder="🔍 Rechercher..." class="search-input-admin" />
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-mini-grid">
+            <div class="stat-mini-card">
+                <span class="stat-icon">📅</span>
+                <div>
+                    <h3>@Model.Count()</h3>
+                    <p>Total RDV</p>
+                </div>
+            </div>
+            <div class="stat-mini-card">
+                <span class="stat-icon">⏳</span>
+                <div>
+                    <h3>@Model.Count(r => r.Statut == "En attente")</h3>
+                    <p>En attente</p>
+                </div>
+            </div>
+            <div class="stat-mini-card">
+                <span class="stat-icon">✓</span>
+                <div>
+                    <h3>@Model.Count(r => r.Statut == "Confirmé")</h3>
+                    <p>Confirmés</p>
+                </div>
+            </div>
+            <div class="stat-mini-card">
+                <span class="stat-icon">📞</span>
+                <div>
+                    <h3>@Model.Count(r => r.TypeRdv == "Téléphonique")</h3>
+                    <p>Téléconsultations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-admin">
+            <button class="filter-admin-btn active" onclick="filterRdvAdmin('tous')">Tous</button>
+            <button class="filter-admin-btn" onclick="filterRdvAdmin('a-venir')">À venir</button>
+            <button class="filter-admin-btn" onclick="filterRdvAdmin('en-attente')">En attente</button>
+            <button class="filter-admin-btn" onclick="filterRdvAdmin('confirmes')">Confirmés</button>
+            <button class="filter-admin-btn" onclick="filterRdvAdmin('annules')">Annulés</button>
+        </div>
+
+        <!-- Table des RDV -->
+        <div class="table-container">
+            <table class="admin-table" id="rdvTable">
+                <thead>
+                    <tr>
+                        <th>Date & Heure</th>
+                        <th>Étudiant</th>
+                        <th>Médecin</th>
+                        <th>Type</th>
+                        <th>Motif</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rdv in Model.OrderByDescending(r => r.DateHeure))
+                    {
+                        var isPassed = rdv.DateHeure < DateTime.Now;
+                        var isAVenir = rdv.DateHeure >= DateTime.Now && rdv.Statut != "Annulé";
+                        
+                        <tr class="rdv-row" 
+                            data-status="@rdv.Statut.ToLower().Replace(" ", "-")"
+                            data-type="@(isPassed ? "passe" : isAVenir ? "a-venir" : "annule")">
+                            <td>
+                                <strong>@rdv.DateHeure.ToString("dd/MM/yyyy")</strong>
+                                <br><small>⏰ @rdv.DateHeure.ToString("HH:mm")</small>
+                            </td>
+                            <td>
+                                <div class="user-mini-info">
+                                    <div class="user-mini-avatar">
+                                        @rdv.User?.Prenom.Substring(0, 1)@rdv.User?.Nom.Substring(0, 1)
+                                    </div>
+                                    <div>
+                                        <strong>@rdv.User?.Prenom @rdv.User?.Nom</strong>
+                                        <br><small>@rdv.User?.Email</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <strong>Dr. @rdv.Medecin?.Prenom @rdv.Medecin?.Nom</strong>
+                                <br><small>@rdv.Medecin?.Specialite</small>
+                            </td>
+                            <td>
+                                <span class="type-badge type-@(rdv.TypeRdv == "Téléphonique" ? "tel" : "cabinet")">
+                                    @(rdv.TypeRdv == "Téléphonique" ? "📞" : "🏥") @rdv.TypeRdv
+                                </span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(rdv.Motif))
+                                {
+                                    <span title="@rdv.Motif">@rdv.Motif.Substring(0, Math.Min(50, rdv.Motif.Length))@(rdv.Motif.Length > 50 ? "..." : "")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                <select class="status-select" onchange="changerStatut(@rdv.Id, this.value)">
+                                    @{
+                                        var statuts = new[] { "En attente", "Confirmé", "Annulé", "Terminé" };
+                                        var icones = new Dictionary<string, string> {
+                                { "En attente", "⏳" },
+                                { "Confirmé", "✓" },
+                                { "Annulé", "❌" },
+                                { "Terminé", "✔️" }
+                                };
+                                    }
+                                    @foreach (var statut in statuts)
+                                    {
+                                        <option value="@statut" selected="@(rdv.Statut == statut)">
+                                            @icones[statut] @statut
+                                        </option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    @if (!string.IsNullOrEmpty(rdv.User?.Email))
+                                    {
+                                        <a href="mailto:@rdv.User.Email" class="btn-icon btn-email" title="Envoyer un email">
+                                            📧
+                                        </a>
+                                    }
+                                    @if (!string.IsNullOrEmpty(rdv.User?.Telephone))
+                                    {
+                                        <a href="tel:@rdv.User.Telephone" class="btn-icon btn-phone" title="Appeler">
+                                            📞
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <span class="empty-icon">📅</span>
+                    <h3>Aucun rendez-vous</h3>
+                    <p>Les rendez-vous pris par les étudiants apparaîtront ici</p>
+                </div>
+            }
+        </div>
+    </main>
+</div>
+<script>
+    document.getElementById('searchRdv').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#rdvTable tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    function filterRdvAdmin(filter) {
+        document.querySelectorAll('.filter-admin-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        const rows = document.querySelectorAll('.rdv-row');
+
+        rows.forEach(row => {
+            if (filter === 'tous') {
+                row.style.display = '';
+            } else if (filter === 'en-attente') {
+                row.style.display = row.dataset.status === 'en-attente' ? '' : 'none';
+            } else if (filter === 'confirmes') {
+                row.style.display = row.dataset.status === 'confirmé' ? '' : 'none';
+            } else if (filter === 'annules') {
+                row.style.display = row.dataset.status === 'annulé' ? '' : 'none';
+            } else if (filter === 'a-venir') {
+                row.style.display = row.dataset.type === 'a-venir' ? '' : 'none';
+            }
+        });
+    }
+
+    function changerStatut(rdvId, nouveauStatut) {
+        if (confirm('Changer le statut de ce rendez-vous en "' + nouveauStatut + '" ?')) {
+
+            const body = JSON.stringify({
+                rdvId: rdvId,
+                statut: nouveauStatut
+            });
+
+            fetch('/Admin/ChangerStatutRdv', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✓ Statut mis à jour avec succès !');
+                    location.reload();
+                } else {
+                    alert('❌ Erreur : ' + data.message);
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                alert('❌ Erreur de connexion');
+                location.reload();
+            });
+        } else {
+            location.reload();
+        }
+    }
+</script>

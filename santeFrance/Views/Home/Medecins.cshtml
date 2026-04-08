@@ -1,0 +1,204 @@
+﻿@model IEnumerable<SanteFrance.Models.Medecin>
+
+@{
+    ViewData["Title"] = "Trouver un médecin";
+}
+
+<section class="page-header-search">
+    <div class="container">
+        <h1>Trouver un médecin</h1>
+        <p class="lead">Recherchez des professionnels de santé qui parlent votre langue et comprennent votre situation.</p>
+
+        <div class="search-container">
+            <form method="get" asp-action="Medecins" class="search-box">
+                <div class="search-input-group">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" name="search" placeholder="Nom du médecin ou spécialité..." class="search-input" value="@ViewBag.Search">
+                </div>
+                <div class="search-input-group">
+                    <span class="search-icon">📍</span>
+                    <input type="text" name="ville" placeholder="Ville ou code postal" class="search-input" value="@ViewBag.Ville">
+                </div>
+                <button type="submit" class="btn-search">Rechercher</button>
+            </form>
+        </div>
+
+        <div class="filters-bar">
+            <a href="@Url.Action("Medecins")" class="filter-btn @(string.IsNullOrEmpty(ViewBag.Langue) ? "active" : "")">
+                Tous les médecins
+            </a>
+            <a href="@Url.Action("Medecins", new { langue = "Anglais" })" class="filter-btn @(ViewBag.Langue == "Anglais" ? "active" : "")">
+                Parle Anglais
+            </a>
+            <a href="@Url.Action("Medecins", new { langue = "Arabe" })" class="filter-btn @(ViewBag.Langue == "Arabe" ? "active" : "")">
+                Parle Arabe
+            </a>
+            <a href="@Url.Action("Medecins", new { langue = "Espagnol" })" class="filter-btn @(ViewBag.Langue == "Espagnol" ? "active" : "")">
+                Parle Espagnol
+            </a>
+            <a href="@Url.Action("Medecins", new { tiersPayant = "true" })" class="filter-btn @(ViewBag.TiersPayant == "true" ? "active" : "")">
+                Tiers-payant
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="doctors-section">
+    <div class="container">
+        @if (Model != null && Model.Any())
+        {
+            <p class="results-count">@Model.Count() médecin(s) trouvé(s)</p>
+
+            <div class="doctors-grid">
+                @foreach (var medecin in Model)
+                {
+                    <div class="doctor-card">
+                        <div class="doctor-header">
+                            <div class="doctor-avatar">
+                                <div class="medecin-avatar-lg">
+                                    @(medecin.PhotoUrl ?? "👨‍⚕️")
+                                </div>
+                            </div>
+                            <div class="doctor-info">
+                                <h3>Dr. @medecin.Prenom @medecin.Nom</h3>
+                                <p class="doctor-specialty">@medecin.Specialite</p>
+                            </div>
+                        </div>
+                        <div class="doctor-details">
+                            <div class="detail-item">
+                                <span class="detail-icon">📍</span>
+                                <span>@medecin.Ville (@medecin.CodePostal)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">🗣️</span>
+                                <span>@medecin.Langues</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">💳</span>
+                                <span>@(medecin.AccepteCarteVitale ? "Accepte la Carte Vitale" : "N'accepte pas la Carte Vitale")</span>
+                            </div>
+                            @if (medecin.TiersPayant)
+                            {
+                                <div class="detail-item">
+                                    <span class="detail-icon">✓</span>
+                                    <span style="color: #0D9488; font-weight: 600;">Pratique le tiers-payant</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(medecin.Telephone))
+                            {
+                                <div class="detail-item">
+                                    <span class="detail-icon">📞</span>
+                                    <a href="tel:@medecin.Telephone">@medecin.Telephone</a>
+                                </div>
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(medecin.Description))
+                        {
+                            <div class="doctor-description">
+                                <p>@medecin.Description</p>
+                            </div>
+                        }
+                        <a href="/Student/CalendrierMedecin?medecinId=@medecin.Id" class="btn-appointment">
+                            📅 Voir les disponibilités
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <span class="empty-icon">🔍</span>
+                <h3>Aucun médecin trouvé</h3>
+                <p>Essayez de modifier vos critères de recherche</p>
+                <a href="@Url.Action("Medecins")" class="btn-primary">Réinitialiser la recherche</a>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="info-banner">
+    <div class="container">
+        <div class="banner-content">
+            <span class="banner-icon">ℹ️</span>
+            <div>
+                <h3>Vous ne trouvez pas de médecin ?</h3>
+                <p>Appelez le 36 46 (Ameli) pour obtenir de l'aide dans votre recherche ou consultez doctolib.fr</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function voirCalendrier(medecinId) {
+        @if (Context.Session.GetInt32("UserId") != null)
+        {
+                <text>
+                window.location.href = '/Student/CalendrierMedecin?medecinId=' + medecinId;
+                </text>
+        }
+        else
+        {
+                <text>
+                if (confirm("Vous devez vous connecter pour voir les disponibilités.\n\nVoulez-vous vous connecter maintenant ?")) {
+                    window.location.href = '@Url.Action("Login", "Account")';
+                }
+                </text>
+        }
+    }
+</script>
+
+<style>
+    .results-count {
+        text-align: center;
+        font-size: 18px;
+        color: #64748B;
+        margin-bottom: 32px;
+        font-weight: 600;
+    }
+
+    .doctor-description {
+        margin: 16px 0;
+        padding: 12px;
+        background: #F8FAFC;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .detail-item a {
+        color: #0D9488;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .detail-item a:hover {
+            text-decoration: underline;
+        }
+
+    /* Photo dans la carte médecin */
+    .doctor-avatar {
+        background: linear-gradient(135deg, #0D9488, #0EA5E9);
+        overflow: hidden;
+    }
+
+        .doctor-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+    .medecin-avatar-lg {
+        width: 80px;
+        height: 80px;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0D9488, #0EA5E9);
+    }
+</style>

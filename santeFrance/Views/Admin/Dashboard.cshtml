@@ -1,0 +1,130 @@
+﻿@{
+    ViewData["Title"] = "Dashboard Admin";
+    var stats = ViewBag.Stats;
+    var adminName = ViewBag.AdminName;
+}
+
+<div class="admin-container">
+    <!-- Sidebar Admin -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-admin">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">Admin Panel</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item active">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a asp-action="Medecins" class="nav-item">
+                <span class="nav-icon">👨‍⚕️</span>
+                <span>Médecins</span>
+            </a>
+            <a asp-action="Etudiants" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span>Étudiants</span>
+            </a>
+            <a asp-action="RendezVous" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span>Rendez-vous</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout">
+                <span>🚪</span> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <div>
+                    <h1>Dashboard Administrateur</h1>
+                    <p>Bienvenue, @adminName 👋</p>
+                </div>
+                <div class="header-user">
+                    <div class="user-avatar admin-avatar">A</div>
+                </div>
+            </div>
+        </header>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["Success"]
+            </div>
+        }
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-icon">👨‍⚕️</div>
+                <div class="stat-info">
+                    <h3>@stats.TotalMedecins</h3>
+                    <p>Médecins</p>
+                </div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <h3>@stats.TotalEtudiants</h3>
+                    <p>Étudiants</p>
+                </div>
+            </div>
+
+            <div class="stat-card purple">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                    <h3>@stats.TotalRdv</h3>
+                    <p>Rendez-vous</p>
+                </div>
+            </div>
+
+            <div class="stat-card orange">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <h3>@stats.RdvEnAttente</h3>
+                    <p>En attente</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>Actions rapides</h2>
+            <div class="actions-grid">
+                <a asp-action="AjouterMedecin" class="action-card">
+                    <span class="action-icon">➕</span>
+                    <h3>Ajouter un médecin</h3>
+                    <p>Ajouter un nouveau professionnel de santé</p>
+                </a>
+
+                <a asp-action="Medecins" class="action-card">
+                    <span class="action-icon">📋</span>
+                    <h3>Gérer les médecins</h3>
+                    <p>Voir et modifier la liste des médecins</p>
+                </a>
+
+                <a asp-action="Etudiants" class="action-card">
+                    <span class="action-icon">👥</span>
+                    <h3>Gérer les étudiants</h3>
+                    <p>Consulter la liste des étudiants inscrits</p>
+                </a>
+
+                <a asp-action="RendezVous" class="action-card">
+                    <span class="action-icon">📅</span>
+                    <h3>Voir les RDV</h3>
+                    <p>Consulter tous les rendez-vous</p>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>

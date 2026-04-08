@@ -1,0 +1,177 @@
+﻿@model IEnumerable<SanteFrance.Models.User>
+
+@{
+    ViewData["Title"] = "Gestion des Étudiants";
+}
+
+<div class="admin-container">
+    <!-- Sidebar Admin -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-admin">
+                <div class="logo-icon">S</div>
+                <span class="logo-text">Admin Panel</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a asp-action="Medecins" class="nav-item">
+                <span class="nav-icon">👨‍⚕️</span>
+                <span>Médecins</span>
+            </a>
+            <a asp-action="Etudiants" class="nav-item active">
+                <span class="nav-icon">👥</span>
+                <span>Étudiants</span>
+            </a>
+            <a asp-action="RendezVous" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span>Rendez-vous</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout">
+                <span>🚪</span> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <div>
+                    <h1>Gestion des Étudiants</h1>
+                    <p>@Model.Count() étudiant(s) inscrit(s)</p>
+                </div>
+                <div class="search-box-admin">
+                    <input type="text" id="searchEtudiants" placeholder="🔍 Rechercher un étudiant..." class="search-input-admin" />
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-mini-grid">
+            <div class="stat-mini-card">
+                <span class="stat-icon">👥</span>
+                <div>
+                    <h3>@Model.Count()</h3>
+                    <p>Total étudiants</p>
+                </div>
+            </div>
+            <div class="stat-mini-card">
+                <span class="stat-icon">📅</span>
+                <div>
+                    <h3>@ViewBag.TotalRdv</h3>
+                    <p>RDV pris</p>
+                </div>
+            </div>
+            <div class="stat-mini-card">
+                <span class="stat-icon">💳</span>
+                <div>
+                    <h3>@Model.Count(u => u.ACarteVitale)</h3>
+                    <p>Carte Vitale</p>
+                </div>
+            </div>
+            <div class="stat-mini-card">
+                <span class="stat-icon">📝</span>
+                <div>
+                    <h3>@Model.Count(u => !string.IsNullOrEmpty(u.NumeroSecu))</h3>
+                    <p>N° Sécu enregistré</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table des étudiants -->
+        <div class="table-container">
+            <table class="admin-table" id="etudiantsTable">
+                <thead>
+                    <tr>
+                        <th>Étudiant</th>
+                        <th>Date de naissance</th>
+                        <th>Nationalité</th>
+                        <th>Université</th>
+                        <th>Téléphone</th>
+                        <th>Sécurité Sociale</th>
+                        <th>Inscription</th>
+                        <th>RDV</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var etudiant in Model.OrderByDescending(u => u.DateInscription))
+                    {
+                        <tr>
+                            <td>
+                                <div class="medecin-info">
+                                    <div class="medecin-avatar">
+                                        @etudiant.Prenom.Substring(0, 1)@etudiant.Nom.Substring(0, 1)
+                                    </div>
+                                    <div>
+                                        <strong>@etudiant.Prenom @etudiant.Nom</strong>
+                                        <br><small>@etudiant.Email</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @etudiant.DateNaissance.ToString("dd/MM/yyyy")
+                                <br><small>@((DateTime.Now.Year - etudiant.DateNaissance.Year)) ans</small>
+                            </td>
+                            <td>@etudiant.Nationalite</td>
+                            <td>@(etudiant.Universite ?? "-")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(etudiant.Telephone))
+                                {
+                                    <a href="tel:@etudiant.Telephone">@etudiant.Telephone</a>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (etudiant.ACarteVitale)
+                                {
+                                    <span class="badge badge-success">✓ Carte Vitale</span>
+                                }
+                                else if (!string.IsNullOrEmpty(etudiant.NumeroSecu))
+                                {
+                                    <span class="badge badge-warning">N° Sécu</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">En attente</span>
+                                }
+                            </td>
+                            <td>@etudiant.DateInscription.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <span class="rdv-count">@ViewBag.RdvParEtudiant[etudiant.Id]</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Recherche en temps réel
+    document.getElementById('searchEtudiants').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#etudiantsTable tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
