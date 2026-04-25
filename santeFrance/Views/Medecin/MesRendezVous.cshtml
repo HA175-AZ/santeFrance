@@ -1,0 +1,173 @@
+﻿@model IEnumerable<SanteFrance.Models.RendezVous>
+@{
+    ViewData["Title"] = "Mes rendez-vous";
+    var medecin = ViewBag.Medecin as SanteFrance.Models.Medecin;
+}
+
+<link rel="stylesheet" href="~/css/student.css" />
+
+<div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-dashboard">
+                <span style="font-size:24px;">👨‍⚕️</span>
+                <span>Espace Médecin</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span>Tableau de bord</span>
+            </a>
+            <a asp-action="MesRendezVous" class="nav-item active">
+                <span class="nav-icon">📅</span>
+                <span>Mes rendez-vous</span>
+            </a>
+            <a asp-action="MonProfil" class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span>Mon profil</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout">
+                <span>🚪</span> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        <header class="dashboard-header">
+            <h1>Mes rendez-vous patients</h1>
+            <p>@Model.Count() rendez-vous</p>
+        </header>
+
+        @if (Model.Any())
+        {
+            <div class="rdv-list-grid">
+                @foreach (var rdv in Model)
+                {
+                    var isPasse = rdv.DateHeure < DateTime.Now;
+                    var cssClass = rdv.Statut == "Annulé" ? "rdv-annule" : (isPasse ? "rdv-passe" : "rdv-a-venir");
+
+                    <div class="rdv-card-full @cssClass">
+                        <div class="rdv-card-header">
+                            <div class="rdv-date-badge @(isPasse ? "" : "badge-active")">
+                                <div class="date-day">@rdv.DateHeure.Day</div>
+                                <div class="date-month">@rdv.DateHeure.ToString("MMM")</div>
+                                <div class="date-year">@rdv.DateHeure.Year</div>
+                            </div>
+
+                            <div class="rdv-info-main">
+                                <div class="rdv-medecin">
+                                    <div class="medecin-avatar-small">
+                                        @rdv.User?.Prenom?.Substring(0, 1)@rdv.User?.Nom?.Substring(0, 1)
+                                    </div>
+                                    <div>
+                                        <h3>@rdv.User?.Prenom @rdv.User?.Nom</h3>
+                                        <p class="specialite-small">@rdv.User?.Email</p>
+                                    </div>
+                                </div>
+
+                                <div class="rdv-details-grid">
+                                    <span class="detail-small">
+                                        <span class="icon-small">🕐</span>
+                                        @rdv.DateHeure.ToString("HH:mm")
+                                    </span>
+                                    <span class="detail-small">
+                                        <span class="icon-small">⏱️</span>
+                                        @rdv.DureeMinutes min
+                                    </span>
+                                    <span class="detail-small">
+                                        <span class="icon-small">📍</span>
+                                        @rdv.TypeRdv
+                                    </span>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(rdv.Motif))
+                                {
+                                    <div class="rdv-motif">
+                                        <strong>Motif :</strong> @rdv.Motif
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="rdv-status-actions">
+                                <span class="status-badge status-@rdv.Statut.ToLower().Replace("é", "e")">
+                                    @rdv.Statut
+                                </span>
+
+                                @if (rdv.Statut == "En attente" && !isPasse)
+                                {
+                                    <div class="rdv-actions">
+                                        <button onclick="changerStatut(@rdv.Id, 'Confirmé')" class="btn-icon" style="background:#D1FAE5;" title="Confirmer">
+                                            ✓
+                                        </button>
+                                        <button onclick="changerStatut(@rdv.Id, 'Annulé')" class="btn-icon btn-cancel" title="Annuler">
+                                            ✗
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(rdv.User?.Telephone))
+                        {
+                            <div class="rdv-card-footer">
+                                <span class="adresse-info">📞 @rdv.User.Telephone</span>
+                                <a href="tel:@rdv.User.Telephone" class="btn-call">Appeler le patient</a>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <span class="empty-icon">📅</span>
+                <h3>Aucun rendez-vous</h3>
+                <p>Vous n'avez aucun rendez-vous prévu pour le moment.</p>
+            </div>
+        }
+    </main>
+</div>
+
+<script>
+    function changerStatut(rdvId, statut) {
+        if (!confirm(`Êtes-vous sûr de vouloir ${statut === 'Confirmé' ? 'confirmer' : 'annuler'} ce rendez-vous ?`)) return;
+
+        fetch('/Medecin/ChangerStatutRdv', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `rdvId=${rdvId}&statut=${statut}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ ' + data.message);
+                location.reload();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        });
+    }
+</script>
+
+@*
+// À décommenter lors de l'ajout de la fonctionnalité d'authentification
+// <div class="auth-container">
+//     <h2>Connexion Médecin</h2>
+//     <form asp-action="Connexion" method="post">
+//         <div class="form-group">
+//             <label for="email">Email</label>
+//             <input type="email" id="email" name="email" required />
+//         </div>
+//         <div class="form-group">
+//             <label for="password">Mot de passe</label>
+//             <input type="password" id="password" name="password" required />
+//         </div>
+//         <button type="submit" class="btn-submit">Se connecter</button>
+//     </form>
+// </div>
+//*@
+

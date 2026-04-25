@@ -14,10 +14,11 @@
                 <p>Accédez à votre espace personnel.</p>
             </div>
 
-            <!-- Onglets -->
+            <!-- Onglets avec MÉDECIN ajouté -->
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('etudiant')">Étudiant</button>
-                <button class="tab" onclick="switchTab('admin')">Admin</button>
+                <button class="tab active" onclick="switchTab('etudiant')">👤 Étudiant</button>
+                <button class="tab" onclick="switchTab('medecin')">👨‍⚕️ Médecin</button>
+                <button class="tab" onclick="switchTab('admin')">🔧 Admin</button>
             </div>
 
             @if (TempData["Success"] != null)
@@ -66,6 +67,36 @@
                 </div>
             </form>
 
+            <!-- Formulaire Médecin -->
+            <form id="form-medecin" asp-action="Login" method="post" class="auth-form" style="display: none;">
+                <input type="hidden" name="userType" value="Medecin" />
+
+                <div class="form-group">
+                    <label for="email">Email Médecin</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">📧</span>
+                        <input type="email" name="email" class="form-control" placeholder="Votre email professionnel" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="motDePasse">Mot de passe</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="motDePasse" class="form-control" placeholder="••••••••" required />
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    ℹ️ <strong>Votre compte médecin a été créé par un administrateur.</strong><br>
+                    Utilisez l'email et le mot de passe qui vous ont été communiqués.
+                </div>
+
+                <button type="submit" class="btn-auth">
+                    Connexion Médecin →
+                </button>
+            </form>
+
             <!-- Formulaire Admin -->
             <form id="form-admin" asp-action="Login" method="post" class="auth-form" style="display: none;">
                 <input type="hidden" name="userType" value="Admin" />
@@ -107,11 +138,15 @@
         event.target.classList.add('active');
 
         // Afficher/masquer les formulaires
+        document.getElementById('form-etudiant').style.display = 'none';
+        document.getElementById('form-admin').style.display = 'none';
+        document.getElementById('form-medecin').style.display = 'none';
+
         if (type === 'etudiant') {
             document.getElementById('form-etudiant').style.display = 'block';
-            document.getElementById('form-admin').style.display = 'none';
-        } else {
-            document.getElementById('form-etudiant').style.display = 'none';
+        } else if (type === 'medecin') {
+            document.getElementById('form-medecin').style.display = 'block';
+        } else if (type === 'admin') {
             document.getElementById('form-admin').style.display = 'block';
         }
     }
@@ -141,7 +176,7 @@
 
         .tab.active {
             background: white;
-            color: #7C3AED;
+            color: #0D9488;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 

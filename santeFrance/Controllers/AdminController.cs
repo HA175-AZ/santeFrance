@@ -63,28 +63,78 @@ namespace SanteFrance.Controllers
         // POST: Admin/AjouterMedecin
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AjouterMedecin(Medecin medecin, IFormFile? photo)
+        public async Task<IActionResult> AjouterMedecin(Medecin medecin, IFormFile? photo, string motDePasseTemporaire)
         {
             if (!IsAdminLoggedIn())
                 return RedirectToAction("Login", "Account");
 
-            if (ModelState.IsValid)
-            {
-                medecin.DateAjout = DateTime.Now;
-                medecin.EstActif = true;
+            // ✅ CRITIQUE : Supprimer la validation pour les champs que nous remplissons manuellement
+            ModelState.Remove("MotDePasse");
+            ModelState.Remove("DerniereConnexion");
 
-                // Upload photo si fournie
-                if (photo != null && photo.Length > 0)
+            // ✅ Vérifier si l'email existe déjà
+            var existingMedecin = await _context.Medecins.FirstOrDefaultAsync(m => m.Email == medecin.Email);
+            if (existingMedecin != null)
+            {
+                TempData["Error"] = "❌ Cet email est déjà utilisé par un autre médecin.";
+                return View(medecin);
+            }
+
+            // ✅ Vérifier que le mot de passe temporaire n'est pas vide
+            if (string.IsNullOrWhiteSpace(motDePasseTemporaire))
+            {
+                TempData["Error"] = "❌ Le mot de passe temporaire est obligatoire.";
+                return View(medecin);
+            }
+
+            // ✅ Initialiser TOUS les champs obligatoires
+            medecin.DateAjout = DateTime.Now;
+            medecin.EstActif = true;
+            medecin.DerniereConnexion = null;
+            
+            // ✅ CRITIQUE : Hash du mot de passe AVANT l'ajout
+            medecin.MotDePasse = BCrypt.Net.BCrypt.HashPassword(motDePasseTemporaire);
+
+            // Upload photo si fournie
+            if (photo != null && photo.Length > 0)
+            {
+                try
                 {
                     medecin.PhotoUrl = await SaveMedecinPhoto(photo);
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "❌ Erreur lors de l'upload de la photo : " + ex.Message;
+                    return View(medecin);
+                }
+            }
+
+            try
+            {
+                // ✅ Vérifier que le mot de passe est bien hashé
+                if (string.IsNullOrEmpty(medecin.MotDePasse) || medecin.MotDePasse.Length < 20)
+                {
+                    TempData["Error"] = "❌ Erreur : Le mot de passe n'a pas été hashé correctement.";
+                    return View(medecin);
                 }
 
                 _context.Medecins.Add(medecin);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Médecin ajouté avec succès !";
+
+                // ✅ Afficher les identifiants créés
+                TempData["Success"] = $"✅ Médecin créé avec succès !<br>" +
+                                      $"<strong>Nom :</strong> Dr. {medecin.Prenom} {medecin.Nom}<br>" +
+                                      $"<strong>Email :</strong> {medecin.Email}<br>" +
+                                      $"<strong>Mot de passe temporaire :</strong> {motDePasseTemporaire}<br>" +
+                                      $"<small>⚠️ Communiquez ces identifiants au médecin</small>";
+                
                 return RedirectToAction("Medecins");
             }
-            return View(medecin);
+            catch (Exception ex)
+            {
+                TempData["Error"] = "❌ Erreur lors de la création : " + ex.Message;
+                return View(medecin);
+            }
         }
 
         // GET: Admin/ModifierMedecin/5
@@ -102,7 +152,7 @@ namespace SanteFrance.Controllers
         // POST: Admin/ModifierMedecin/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ModifierMedecin(int id, Medecin medecin, IFormFile? photo)
+        public async Task<IActionResult> ModifierMedecin(int id, Medecin medecin, IFormFile? photo, string? nouveauMotDePasse)
         {
             if (!IsAdminLoggedIn())
                 return RedirectToAction("Login", "Account");
@@ -114,12 +164,10 @@ namespace SanteFrance.Controllers
             {
                 try
                 {
-                    // Récupérer l'ancien médecin pour garder la photo si pas de nouvelle
                     var existingMedecin = await _context.Medecins.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
 
                     if (photo != null && photo.Length > 0)
                     {
-                        // Supprimer l'ancienne photo
                         if (existingMedecin != null && !string.IsNullOrEmpty(existingMedecin.PhotoUrl)
                             && existingMedecin.PhotoUrl.StartsWith("/uploads/"))
                         {
@@ -129,13 +177,27 @@ namespace SanteFrance.Controllers
                     }
                     else if (string.IsNullOrEmpty(medecin.PhotoUrl))
                     {
-                        // Garder l'ancienne photo si le champ est vide
                         medecin.PhotoUrl = existingMedecin?.PhotoUrl;
                     }
 
+                    // ✅ Si un nouveau mot de passe est fourni
+                    if (!string.IsNullOrWhiteSpace(nouveauMotDePasse))
+                    {
+                        medecin.MotDePasse = BCrypt.Net.BCrypt.HashPassword(nouveauMotDePasse);
+                        TempData["Success"] = $"Médecin modifié avec succès ! Nouveau mot de passe : {nouveauMotDePasse}";
+                    }
+                    else
+                    {
+                        // Conserver l'ancien mot de passe
+                        medecin.MotDePasse = existingMedecin?.MotDePasse ?? "";
+                        TempData["Success"] = "Médecin modifié avec succès !";
+                    }
+
+                    // Conserver la date de dernière connexion
+                    medecin.DerniereConnexion = existingMedecin?.DerniereConnexion;
+
                     _context.Update(medecin);
                     await _context.SaveChangesAsync();
-                    TempData["Success"] = "Médecin modifié avec succès !";
                 }
                 catch (DbUpdateConcurrencyException)
                 {

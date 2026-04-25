@@ -27,42 +27,42 @@
         <header class="admin-header">
             <div class="header-content">
                 <div>
-                    <h1>➕ Ajouter un Médecin</h1>
-                    <p>Remplissez les informations du médecin</p>
+                    <h1>➕ Ajouter un médecin</h1>
+                    <p>Créer un nouveau compte médecin</p>
                 </div>
                 <a asp-action="Medecins" class="btn-secondary">← Retour à la liste</a>
             </div>
         </header>
 
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@Html.Raw(TempData["Success"])</div>
+        }
+
         <div class="form-container">
             <form asp-action="AjouterMedecin" method="post" enctype="multipart/form-data" class="admin-form">
-
-                <!-- Photo -->
+                
                 <div class="form-section">
                     <h3>📷 Photo du médecin</h3>
                     <div class="photo-upload-zone" id="photoZone" onclick="document.getElementById('photoMedecin').click()">
-                        <img id="photoPreview" class="photo-preview" style="display:none;" />
+                        <img id="photoPreview" class="photo-preview" style="display:none;" alt="Preview" />
                         <span class="photo-upload-icon" id="photoIcon">📷</span>
                         <div class="photo-upload-text" id="photoText">Cliquez pour ajouter une photo</div>
                         <div class="photo-upload-hint">JPG, PNG, GIF ou WebP · Max 5 Mo</div>
                     </div>
-                    <input type="file" name="photo" id="photoMedecin" accept=".jpg,.jpeg,.png,.gif,.webp" style="display:none;"
-                           onchange="previewPhoto(this)" />
+                    <input type="file" name="photo" id="photoMedecin" accept=".jpg,.jpeg,.png,.gif,.webp" style="display:none;" onchange="previewPhoto(this)" />
                 </div>
 
-                <!-- Infos personnelles -->
                 <div class="form-section">
                     <h3>👤 Informations personnelles</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label asp-for="Nom">Nom *</label>
-                            <input asp-for="Nom" class="form-control" placeholder="Dupont" required />
-                            <span asp-validation-for="Nom" class="text-danger"></span>
+                            <input asp-for="Nom" class="form-control" required />
                         </div>
                         <div class="form-group">
                             <label asp-for="Prenom">Prénom *</label>
-                            <input asp-for="Prenom" class="form-control" placeholder="Marie" required />
-                            <span asp-validation-for="Prenom" class="text-danger"></span>
+                            <input asp-for="Prenom" class="form-control" required />
                         </div>
                     </div>
                     <div class="form-group">
@@ -78,66 +78,75 @@
                             <option value="Ophtalmologue">Ophtalmologue</option>
                             <option value="Dentiste">Dentiste</option>
                             <option value="ORL">ORL</option>
-                            <option value="Autre">Autre</option>
                         </select>
-                        <span asp-validation-for="Specialite" class="text-danger"></span>
                     </div>
                 </div>
 
-                <!-- Contact -->
                 <div class="form-section">
-                    <h3>📞 Contact</h3>
+                    <h3>📞 Contact et Connexion</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label asp-for="Telephone">Téléphone</label>
-                            <input asp-for="Telephone" type="tel" class="form-control" placeholder="+33 1 23 45 67 89" />
+                            <input asp-for="Telephone" type="tel" class="form-control" />
                         </div>
                         <div class="form-group">
-                            <label asp-for="Email">Email</label>
-                            <input asp-for="Email" type="email" class="form-control" placeholder="dr.dupont@email.fr" />
+                            <label asp-for="Email">Email (Identifiant) *</label>
+                            <input asp-for="Email" type="email" class="form-control" required />
                         </div>
                     </div>
+                    
+                    <div class="form-group" style="background: lightyellow; padding: 15px; border-radius: 8px;">
+                        <label for="motDePasseTemporaire">🔐 Mot de passe temporaire *</label>
+                        <input type="text" name="motDePasseTemporaire" id="motDePasseTemporaire" class="form-control" required />
+                        <small class="form-text text-muted">Ce mot de passe sera communiqué au médecin pour sa première connexion.</small>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="genererMotDePasse()">🎲 Générer</button>
+                    </div>
+
                     <div class="form-group">
                         <label asp-for="Adresse">Adresse *</label>
-                        <input asp-for="Adresse" class="form-control" placeholder="15 rue de la République" required />
-                        <span asp-validation-for="Adresse" class="text-danger"></span>
+                        <input asp-for="Adresse" class="form-control" required />
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label asp-for="CodePostal">Code Postal *</label>
-                            <input asp-for="CodePostal" class="form-control" placeholder="75001" required />
+                            <input asp-for="CodePostal" class="form-control" required />
                         </div>
                         <div class="form-group">
                             <label asp-for="Ville">Ville *</label>
-                            <input asp-for="Ville" class="form-control" placeholder="Paris" required />
+                            <input asp-for="Ville" class="form-control" required />
                         </div>
                     </div>
                 </div>
 
-                <!-- Complémentaire -->
                 <div class="form-section">
                     <h3>ℹ️ Informations complémentaires</h3>
                     <div class="form-group">
                         <label asp-for="Langues">Langues parlées *</label>
-                        <input asp-for="Langues" class="form-control" placeholder="Français, Anglais, Arabe" required />
-                        <small class="form-text">Séparez par des virgules</small>
+                        <input asp-for="Langues" class="form-control" required placeholder="Ex: Français, Anglais" />
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label><input asp-for="AccepteCarteVitale" type="checkbox" checked /> Accepte la Carte Vitale</label>
+                            <label><input asp-for="AccepteCarteVitale" type="checkbox" checked /> Accepte Carte Vitale</label>
                         </div>
                         <div class="form-group">
-                            <label><input asp-for="TiersPayant" type="checkbox" /> Pratique le tiers-payant</label>
+                            <label><input asp-for="TiersPayant" type="checkbox" /> Tiers-payant</label>
+                        </div>
+                        <div class="form-group">
+                            <label><input asp-for="EstActif" type="checkbox" checked /> Actif</label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label asp-for="Description">Description (optionnel)</label>
-                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Informations supplémentaires..."></textarea>
+                        <label asp-for="Description">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Horaires">Horaires</label>
+                        <textarea asp-for="Horaires" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-primary">✓ Ajouter le médecin</button>
+                    <button type="submit" class="btn-primary">✓ Créer le médecin</button>
                     <a asp-action="Medecins" class="btn-secondary">Annuler</a>
                 </div>
             </form>
@@ -154,10 +163,18 @@
                 document.getElementById('photoPreview').style.display = 'block';
                 document.getElementById('photoIcon').style.display = 'none';
                 document.getElementById('photoText').textContent = input.files[0].name;
-                document.getElementById('photoZone').classList.add('has-photo');
             };
             reader.readAsDataURL(input.files[0]);
         }
+    }
+
+    function genererMotDePasse() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+        let pwd = '';
+        for (let i = 0; i < 10; i++) {
+            pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('motDePasseTemporaire').value = pwd;
     }
 </script>
 

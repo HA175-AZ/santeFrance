@@ -36,7 +36,7 @@
 
         @if (TempData["Success"] != null)
         {
-            <div class="alert alert-success">@TempData["Success"]</div>
+            <div class="alert alert-success">@Html.Raw(TempData["Success"])</div>
         }
 
         <div class="form-container">
@@ -44,7 +44,6 @@
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="DateAjout" />
 
-                <!-- Photo -->
                 <div class="form-section">
                     <h3>📷 Photo du médecin</h3>
                     <div class="photo-upload-zone @(!string.IsNullOrEmpty(Model.PhotoUrl) && Model.PhotoUrl.StartsWith("/uploads/") ? "has-photo" : "")"
@@ -52,12 +51,12 @@
 
                         @if (!string.IsNullOrEmpty(Model.PhotoUrl) && Model.PhotoUrl.StartsWith("/uploads/"))
                         {
-                            <img id="photoPreview" class="photo-preview" src="@Model.PhotoUrl" />
+                            <img id="photoPreview" class="photo-preview" src="@Model.PhotoUrl" alt="Photo médecin" />
                             <span class="photo-upload-icon" id="photoIcon" style="display:none;">📷</span>
                         }
                         else
                         {
-                            <img id="photoPreview" class="photo-preview" style="display:none;" />
+                            <img id="photoPreview" class="photo-preview" style="display:none;" alt="Preview" />
                             <span class="photo-upload-icon" id="photoIcon">📷</span>
                         }
                         <div class="photo-upload-text" id="photoText">
@@ -76,19 +75,16 @@
                     }
                 </div>
 
-                <!-- Infos personnelles -->
                 <div class="form-section">
                     <h3>👤 Informations personnelles</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label asp-for="Nom">Nom *</label>
                             <input asp-for="Nom" class="form-control" required />
-                            <span asp-validation-for="Nom" class="text-danger"></span>
                         </div>
                         <div class="form-group">
                             <label asp-for="Prenom">Prénom *</label>
                             <input asp-for="Prenom" class="form-control" required />
-                            <span asp-validation-for="Prenom" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -104,12 +100,10 @@
                             <option value="Ophtalmologue">Ophtalmologue</option>
                             <option value="Dentiste">Dentiste</option>
                             <option value="ORL">ORL</option>
-                            <option value="Autre">Autre</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Contact -->
                 <div class="form-section">
                     <h3>📞 Contact</h3>
                     <div class="form-row">
@@ -118,8 +112,8 @@
                             <input asp-for="Telephone" type="tel" class="form-control" />
                         </div>
                         <div class="form-group">
-                            <label asp-for="Email">Email</label>
-                            <input asp-for="Email" type="email" class="form-control" />
+                            <label asp-for="Email">Email *</label>
+                            <input asp-for="Email" type="email" class="form-control" required />
                         </div>
                     </div>
                     <div class="form-group">
@@ -138,13 +132,26 @@
                     </div>
                 </div>
 
-                <!-- Complémentaire -->
+                <div class="form-section">
+                    <h3>🔐 Sécurité du compte</h3>
+                    <div class="form-group" style="background: lightgray; padding: 15px; border-radius: 8px;">
+                        <label>Réinitialiser le mot de passe</label>
+                        <input type="text" name="nouveauMotDePasse" id="nouveauMotDePasse" class="form-control" placeholder="Laisser vide pour ne pas modifier" />
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="genererMotDePasse()">🎲 Générer</button>
+                        <small class="form-text text-muted">Si vous définissez un nouveau mot de passe, l'ancien sera remplacé.</small>
+                    </div>
+                    <div class="form-group">
+                        <p><strong>Dernière connexion :</strong> 
+                            @Model.DerniereConnexion?.ToString("dd/MM/yyyy à HH:mm")
+                        </p>
+                    </div>
+                </div>
+
                 <div class="form-section">
                     <h3>ℹ️ Informations complémentaires</h3>
                     <div class="form-group">
                         <label asp-for="Langues">Langues parlées *</label>
                         <input asp-for="Langues" class="form-control" required />
-                        <small class="form-text">Séparez par des virgules</small>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -159,11 +166,11 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="Description">Description</label>
-                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                     </div>
                     <div class="form-group">
                         <label asp-for="Horaires">Horaires</label>
-                        <textarea asp-for="Horaires" class="form-control" rows="3" placeholder="Lun-Ven: 9h-18h"></textarea>
+                        <textarea asp-for="Horaires" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
 
@@ -188,7 +195,6 @@
                 document.getElementById('photoPreview').style.display = 'block';
                 document.getElementById('photoIcon').style.display = 'none';
                 document.getElementById('photoText').textContent = input.files[0].name;
-                document.getElementById('photoZone').classList.add('has-photo');
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -212,10 +218,21 @@
             .then(data => {
                 if (data.success) {
                     alert('✓ Médecin supprimé');
-                    window.location.href = '@Url.Action("Medecins", "Admin")';
-                } else { alert('❌ ' + data.message); }
+                    window.location.href = '/Admin/Medecins';
+                } else { 
+                    alert('❌ ' + data.message); 
+                }
             });
         }
+    }
+
+    function genererMotDePasse() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+        let pwd = '';
+        for (let i = 0; i < 10; i++) {
+            pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('nouveauMotDePasse').value = pwd;
     }
 </script>
 

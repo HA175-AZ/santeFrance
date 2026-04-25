@@ -68,6 +68,7 @@ namespace SanteFrance.Controllers
                 return View();
             }
 
+            // ✅ Connexion Admin
             if (userType == "Admin")
             {
                 var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Email == email);
@@ -85,6 +86,60 @@ namespace SanteFrance.Controllers
                     return RedirectToAction("Dashboard", "Admin");
                 }
             }
+            // ✅ Connexion Médecin (AMÉLIORATION avec messages détaillés)
+            else if (userType == "Medecin")
+            {
+                var medecin = await _context.Medecins
+                    .FirstOrDefaultAsync(m => m.Email.ToLower() == email.ToLower());
+                
+                if (medecin == null)
+                {
+                    ViewBag.Error = $"❌ Aucun médecin trouvé avec l'email : {email}";
+                    return View();
+                }
+
+                if (string.IsNullOrEmpty(medecin.MotDePasse))
+                {
+                    ViewBag.Error = "❌ Le mot de passe du médecin n'est pas défini. Contactez l'administrateur.";
+                    return View();
+                }
+
+                if (!medecin.EstActif)
+                {
+                    ViewBag.Error = "❌ Votre compte a été désactivé. Contactez l'administrateur.";
+                    return View();
+                }
+
+                try
+                {
+                    bool passwordVerified = BCrypt.Net.BCrypt.Verify(motDePasse, medecin.MotDePasse);
+                    
+                    if (passwordVerified)
+                    {
+                        HttpContext.Session.SetInt32("MedecinId", medecin.Id);
+                        HttpContext.Session.SetString("MedecinName", $"Dr. {medecin.Prenom} {medecin.Nom}");
+                        HttpContext.Session.SetString("MedecinEmail", medecin.Email);
+                        HttpContext.Session.SetString("UserType", "Medecin");
+
+                        medecin.DerniereConnexion = DateTime.Now;
+                        await _context.SaveChangesAsync();
+
+                        TempData["Success"] = $"Bienvenue Dr. {medecin.Prenom} {medecin.Nom} !";
+                        return RedirectToAction("Dashboard", "Medecin");
+                    }
+                    else
+                    {
+                        ViewBag.Error = "❌ Mot de passe incorrect. Vérifiez vos identifiants.";
+                        return View();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ViewBag.Error = $"❌ Erreur lors de la vérification : {ex.Message}";
+                    return View();
+                }
+            }
+            // ✅ Connexion Étudiant
             else
             {
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);

@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Tableau de bord Médecin";
+    var stats = ViewBag.Stats;
+    var medecin = ViewBag.Medecin as SanteFrance.Models.Medecin;
+}
+
+<div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-header">
+            <div class="logo-dashboard">
+                <span style="font-size:24px;">👨‍⚕️</span>
+                <span>Espace Médecin</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a asp-action="Dashboard" class="nav-item active">
+                <span class="nav-icon">📊</span>
+                <span>Tableau de bord</span>
+            </a>
+            <a asp-action="MesRendezVous" class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span>Mes rendez-vous</span>
+            </a>
+            <a asp-action="MonProfil" class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span>Mon profil</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a asp-controller="Account" asp-action="Logout" class="btn-logout">
+                <span>🚪</span> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div>
+                    <h1>Bienvenue Dr. @medecin.Prenom @medecin.Nom</h1>
+                    <p>@medecin.Specialite</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>📅 Aujourd'hui</h3>
+                <p style="font-size:32px; font-weight:800; color:#0D9488; margin:12px 0;">@stats.RdvAujourdhui</p>
+                <p style="color:#64748B; font-size:14px;">rendez-vous</p>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>⏳ En attente</h3>
+                <p style="font-size:32px; font-weight:800; color:#F59E0B; margin:12px 0;">@stats.RdvEnAttente</p>
+                <p style="color:#64748B; font-size:14px;">confirmations nécessaires</p>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>📆 Cette semaine</h3>
+                <p style="font-size:32px; font-weight:800; color:#3B82F6; margin:12px 0;">@stats.RdvSemaine</p>
+                <p style="color:#64748B; font-size:14px;">rendez-vous prévus</p>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>👥 Patients</h3>
+                <p style="font-size:32px; font-weight:800; color:#8B5CF6; margin:12px 0;">@stats.TotalPatients</p>
+                <p style="color:#64748B; font-size:14px;">patients différents</p>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>🔔 Actions rapides</h3>
+            <div style="display:flex; gap:12px; margin-top:16px;">
+                <a asp-action="MesRendezVous" class="btn-primary">Voir mes rendez-vous</a>
+                <a asp-action="MonProfil" class="btn-secondary">Modifier mon profil</a>
+            </div>
+        </div>
+    </main>
+</div>
